@@ -1,0 +1,35 @@
+env:
+  - GO111MODULE=on
+  - CGO_ENABLED=0
+  - GO_MODULENAME=github.com/golgoth31/multiShellKonfig
+before:
+  hooks:
+    - go mod download
+builds:
+  - goarch:
+      - amd64
+      - arm64
+    goos:
+      - linux
+      - darwin
+    binary: msk-bin
+    ldflags:
+      - -s
+      - -w
+      - -X "{{.Env.GO_MODULENAME}}/internal.config.Version={{.Tag}}"
+      - -X "{{.Env.GO_MODULENAME}}/internal.config.Date={{.Date}}"
+      - -X "{{.Env.GO_MODULENAME}}/internal.config.BuiltBy=goreleaser"
+archives:
+  - format: binary
+    name_template: "{{ .Binary }}_{{ .Tag }}_{{ .Os }}_{{ .Arch }}"
+checksum:
+  name_template: "msk-bin_{{ .Tag }}_SHA256SUMS.txt"
+snapshot:
+  name_template: "{{ .Tag }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^Merge branch"
