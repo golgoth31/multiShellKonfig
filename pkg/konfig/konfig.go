@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"os"
 	"path"
@@ -121,9 +122,36 @@ func Generate(context *shell.ContextDef, kubeConfig *kubeClientConfig.Config, co
 		}
 	}
 
-	// save context for namespace
-	if err := os.WriteFile(outputFileName, outContext, 0640); err != nil {
-		return "", err
+	// copy
+	_, err = os.Stat(path.Dir(outputFileName) + "/last-known.yaml")
+	if err == nil {
+		// copy last-known context
+		fin, err := os.Open(path.Dir(outputFileName) + "/last-known.yaml")
+		if err != nil {
+			return "", err
+		}
+		defer fin.Close()
+
+		fout, err := os.Create(outputFileName)
+		if err != nil {
+			return "", err
+		}
+		defer fout.Close()
+
+		_, err = io.Copy(fout, fin)
+
+		if err != nil {
+			return "", err
+		}
+	} else {
+		// save context for namespace
+		if err := os.WriteFile(outputFileName, outContext, 0640); err != nil {
+			return "", err
+		}
+
+		if err := os.WriteFile(path.Dir(outputFileName)+"/last-known.yaml", outContext, 0640); err != nil {
+			return "", err
+		}
 	}
 
 	return outputFileName, nil

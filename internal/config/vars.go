@@ -24,4 +24,7 @@ var (
 
 	// BuiltBy represent date of build.
 	BuiltBy string
+
+	// BuiltBy represent date of build.
+	GitCommit string
 )

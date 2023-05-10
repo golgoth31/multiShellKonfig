@@ -1,5 +1,7 @@
 # multiShellKonfig
 
+Freely inspired by [konf-go](https://github.com/SimonTheLeg/konf-go)
+
 ## Install
 
 Download the needed binary from the [release page](https://github.com/golgoth31/multiShellKonfig/releases) and save it as **msk-bin** somewhere in your **$PATH**.
@@ -42,3 +44,4 @@ alias kctx="msk ctx"
 - allow to call 1 specific context
 - clean old contexts
 - completion
+- tests

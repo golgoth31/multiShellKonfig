@@ -16,9 +16,10 @@ builds:
     ldflags:
       - -s
       - -w
-      - -X "{{.Env.GO_MODULENAME}}/internal.config.Version={{.Tag}}"
-      - -X "{{.Env.GO_MODULENAME}}/internal.config.Date={{.Date}}"
-      - -X "{{.Env.GO_MODULENAME}}/internal.config.BuiltBy=goreleaser"
+      - -X "{{.Env.GO_MODULENAME}}/internal/config.Version={{.Tag}}"
+      - -X "{{.Env.GO_MODULENAME}}/internal/config.Date={{.Date}}"
+      - -X "{{.Env.GO_MODULENAME}}/internal/config.BuiltBy=goreleaser"
+      - -X "{{.Env.GO_MODULENAME}}/internal/config.GitCommit={{.ShortCommit}}"
 archives:
   - format: binary
     name_template: "{{ .Binary }}_{{ .Tag }}_{{ .Os }}_{{ .Arch }}"

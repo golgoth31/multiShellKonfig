@@ -16,10 +16,11 @@ var versionCmd = &cobra.Command{
 	Short: "Show msk version",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Printf(
-			"version: %s\nbuildDate: %s\nBuiltBy: %s\n",
+			"version: %s\nbuildDate: %s\nBuiltBy: %s\nGitCommit: %s\n",
 			config.Version,
 			config.Date,
 			config.BuiltBy,
+			config.GitCommit,
 		)
 	},
 }
