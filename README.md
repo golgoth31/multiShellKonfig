@@ -30,7 +30,15 @@ To enter a new namespace:
 msk namespace (or ns)
 ```
 
+You can define some alias for convinience, for example:
+
+```sh
+alias kns="msk ns"
+alias kctx="msk ctx"
+```
+
 ## To do
 
-- context in alphabetical order
+- allow to call 1 specific context
 - clean old contexts
+- completion

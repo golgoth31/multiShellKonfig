@@ -21,7 +21,7 @@ var namespaceCmd = &cobra.Command{
 	Aliases: []string{
 		"ns",
 	},
-	Short: "A brief description of your command",
+	Short: "Set the KUBECONFIG env variable to a specific namespace in the current context",
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		if !noID {

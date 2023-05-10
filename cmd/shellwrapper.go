@@ -12,7 +12,7 @@ import (
 // shellwrapperCmd represents the shellwrapper command
 var shellwrapperCmd = &cobra.Command{
 	Use:   "shellwrapper",
-	Short: "A brief description of your command",
+	Short: "Wrap a shell function around msk-bin",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var wrapper string

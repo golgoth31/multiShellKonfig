@@ -18,7 +18,7 @@ import (
 var (
 	addCmd = &cobra.Command{
 		Use:   "add",
-		Short: "A brief description of your command",
+		Short: "Add a new kubeconfig file to the list of known files",
 		Long:  ``,
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {

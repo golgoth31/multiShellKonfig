@@ -15,7 +15,7 @@ import (
 // genidCmd represents the genid command
 var genidCmd = &cobra.Command{
 	Use:   "genid",
-	Short: "A brief description of your command",
+	Short: "Generate a uniq id used by the wrapper",
 	Run: func(cmd *cobra.Command, args []string) {
 		localID := xid.New().String()
 		fmt.Println(localID)

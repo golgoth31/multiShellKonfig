@@ -13,7 +13,7 @@ import (
 // versionCmd represents the version command.
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "A brief description of your command",
+	Short: "Show msk version",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Printf(
 			"version: %s\nbuildDate: %s\nBuiltBy: %s\n",

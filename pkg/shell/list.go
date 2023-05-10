@@ -16,8 +16,9 @@ func LoadList(itemList []string) (int, error) {
 	}
 
 	simpleQs := &survey.Select{
-		Message: "Select context:",
-		Options: options,
+		Message:  "Select context:",
+		Options:  options,
+		PageSize: len(options),
 	}
 
 	err := survey.AskOne(simpleQs, &optionIndex)
