@@ -1,20 +1,18 @@
 package shell
 
 import (
-	"fmt"
-
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/rs/zerolog/log"
 )
 
-func LoadPterm(itemList []ContextDef) (ContextDef, error) {
+func LoadList(itemList []string) (int, error) {
 	var (
 		options     []string
 		optionIndex int
 	)
 
 	for _, item := range itemList {
-		options = append(options, fmt.Sprintf("%s (file: %s)", item.Name, item.FilePath))
+		options = append(options, item)
 	}
 
 	simpleQs := &survey.Select{
@@ -26,8 +24,8 @@ func LoadPterm(itemList []ContextDef) (ContextDef, error) {
 	if err != nil {
 		log.Debug().Err(err).Msg("cannot ask list")
 
-		return ContextDef{}, err
+		return 0, err
 	}
 
-	return itemList[optionIndex], nil
+	return optionIndex, nil
 }

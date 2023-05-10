@@ -15,7 +15,10 @@ import (
 
 // contextCmd represents the context command
 var contextCmd = &cobra.Command{
-	Use:   "context",
+	Use: "context",
+	Aliases: []string{
+		"ctx",
+	},
 	Short: "A brief description of your command",
 	Args:  cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -58,17 +61,23 @@ var contextCmd = &cobra.Command{
 
 		log.Debug().Msgf("context list: %v", contextList)
 
-		context, err := shell.LoadPterm(contextList)
+		// convert to string list
+		contextListString := []string{}
+		for _, v := range contextList {
+			contextListString = append(contextListString, fmt.Sprintf("%s (file: %s)", v.Name, v.FilePath))
+		}
+
+		context, err := shell.LoadList(contextListString)
 		if err != nil {
 			return err
 		}
 
-		kubeConfig, err := konfig.Load(context.FilePath, homedir)
+		kubeConfig, err := konfig.Load(contextList[context].FilePath, homedir)
 		if err != nil {
 			return err
 		}
 
-		filePath, err := konfig.Generate(&context, kubeConfig, cfgContexts)
+		filePath, err := konfig.Generate(&contextList[context], kubeConfig, cfgContexts)
 		if err != nil {
 			return err
 		}

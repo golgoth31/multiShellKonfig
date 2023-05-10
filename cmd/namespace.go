@@ -10,35 +10,47 @@ import (
 	"path"
 
 	"github.com/golgoth31/multiShellKonfig/pkg/konfig"
+	"github.com/golgoth31/multiShellKonfig/pkg/shell"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
 // namespaceCmd represents the context command
 var namespaceCmd = &cobra.Command{
-	Use:   "namespace",
+	Use: "namespace",
+	Aliases: []string{
+		"ns",
+	},
 	Short: "A brief description of your command",
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		konfGoReqID = os.Getenv("MSK_REQID")
-		if konfGoReqID == "" {
-			log.Fatal().Msg("Request ID not set")
+		if !noID {
+			konfGoReqID = os.Getenv("MSK_REQID")
+			if konfGoReqID == "" {
+				log.Fatal().Msg("Request ID not set")
+			}
 		}
 
 		curKubeConfig := os.Getenv("KUBECONFIG")
-		if konfGoReqID == "" {
+		if curKubeConfig == "" {
 			log.Fatal().Msg("context not set")
 		}
 
-		namespace := "toto"
+		log.Debug().Msgf("found config: %s", curKubeConfig)
 
+		namespace := ""
 		if len(args) == 1 {
-			// get single context
+			namespace = args[0]
+		} else {
+			namespaceList, err := konfig.GetNSList(curKubeConfig)
+			cobra.CheckErr(err)
 
-			os.Exit(0)
+			ns, err := shell.LoadList(namespaceList)
+			cobra.CheckErr(err)
+
+			namespace = namespaceList[ns]
 		}
 
-		log.Debug().Msgf("found config: %s", curKubeConfig)
 		kubeConfig, err := konfig.Load(curKubeConfig, homedir)
 		cobra.CheckErr(err)
 
@@ -52,13 +64,18 @@ var namespaceCmd = &cobra.Command{
 		err = os.WriteFile(filePath, outContext, 0640)
 		cobra.CheckErr(err)
 
-		fmt.Println("KUBECONFIGTOUSE:" + filePath)
-		err = os.WriteFile(
-			fmt.Sprintf("/tmp/%s", konfGoReqID),
-			[]byte("KUBECONFIGTOUSE:"+filePath),
-			0666,
-		)
-		cobra.CheckErr(err)
+		log.Debug().Msgf("KUBECONFIGTOUSE:" + filePath)
+
+		if !noID {
+			err := os.WriteFile(
+				fmt.Sprintf("/tmp/%s", konfGoReqID),
+				[]byte("KUBECONFIGTOUSE:"+filePath),
+				0666,
+			)
+			cobra.CheckErr(err)
+		} else {
+			log.Info().Msgf("KUBECONFIGTOUSE:" + filePath)
+		}
 	},
 }
 
