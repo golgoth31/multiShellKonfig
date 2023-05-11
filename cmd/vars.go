@@ -16,4 +16,5 @@ var (
 	cfgData     config.Konfigs
 	homedir     string
 	errNoReqID  = errors.New("request ID not set")
+	cleanAll    bool
 )
