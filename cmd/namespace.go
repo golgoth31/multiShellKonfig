@@ -58,13 +58,10 @@ var namespaceCmd = &cobra.Command{
 
 		filePath := path.Dir(curKubeConfig) + "/" + namespace + ".yaml"
 
-		outContext, err := json.Marshal(kubeConfig)
+		fileData, err := json.Marshal(kubeConfig)
 		cobra.CheckErr(err)
 
-		err = os.WriteFile(filePath, outContext, 0640)
-		cobra.CheckErr(err)
-
-		err = os.WriteFile(path.Dir(filePath)+"/last-known.yaml", outContext, 0640)
+		err = konfig.SaveContextFile(filePath, fileData, true)
 		cobra.CheckErr(err)
 
 		log.Debug().Msgf("KUBECONFIGTOUSE:" + filePath)

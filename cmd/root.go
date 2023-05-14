@@ -55,11 +55,11 @@ func initConfig() {
 	// Search config in home directory with name ".msk" (without extension).
 	cfgDir = homedir + "/.kube/msk"
 	cfgFile = cfgDir + "/config.yaml"
-	cfgContexts = cfgDir + "/contexts"
+	cfgContextsPath = cfgDir + "/contexts"
 
-	if _, errOsStat := os.Stat(cfgContexts); err != nil {
+	if _, errOsStat := os.Stat(cfgContextsPath); err != nil {
 		if errors.Is(errOsStat, fs.ErrNotExist) {
-			err = os.MkdirAll(cfgContexts, 0755)
+			err = os.MkdirAll(cfgContextsPath, 0755)
 			cobra.CheckErr(err)
 		}
 	}
