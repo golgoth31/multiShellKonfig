@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"io/fs"
 	"os"
 	"path"
@@ -45,7 +44,7 @@ func Load(path string, homeDir string) (*kubeClientConfig.Config, error) {
 	return &kubeConfig, nil
 }
 
-func Generate(context *shell.ContextDef, kubeConfig *kubeClientConfig.Config, contextsPath string) (string, error) {
+func Generate(context *shell.ContextDef, kubeConfig *kubeClientConfig.Config, contextsPath string) (string, []byte, error) {
 	localContext := kubeClientConfig.NamedContext{}
 	for _, c := range kubeConfig.Contexts {
 		if c.Name == context.Name {
@@ -54,6 +53,8 @@ func Generate(context *shell.ContextDef, kubeConfig *kubeClientConfig.Config, co
 			break
 		}
 	}
+
+	localContext.Context.Namespace = ""
 
 	auth := kubeClientConfig.NamedAuthInfo{}
 	for _, authInfo := range kubeConfig.AuthInfos {
@@ -91,9 +92,24 @@ func Generate(context *shell.ContextDef, kubeConfig *kubeClientConfig.Config, co
 	if err != nil {
 		log.Debug().Err(err).Msg("cannot marshall config")
 
-		return "", err
+		return "", []byte{}, err
 	}
 	contextSha := sha256.Sum256(contextShaData)
+
+	if localContext.Context.Namespace == "" {
+		localContext.Context.Namespace = "default"
+	}
+
+	lastNS, err := os.ReadFile(contextsPath + "/" + context.FileID + "/" + fmt.Sprintf("%x", contextSha) + "/last-namespace")
+	if err != nil {
+		log.Debug().Err(err).Msg("cannot read last-namespace file")
+	}
+
+	log.Debug().Msgf("last namespace: %s", lastNS)
+
+	if lastNS != nil {
+		localContext.Context.Namespace = string(lastNS)
+	}
 
 	// generate new current context
 	newFile.Contexts = []kubeClientConfig.NamedContext{
@@ -101,60 +117,39 @@ func Generate(context *shell.ContextDef, kubeConfig *kubeClientConfig.Config, co
 	}
 	newFile.CurrentContext = context.Name
 
-	outContext, err := json.Marshal(newFile)
+	outFileData, err := json.Marshal(newFile)
 	if err != nil {
 		log.Debug().Err(err).Msg("cannot marshall config")
 
-		return "", err
+		return "", []byte{}, err
 	}
 
-	if localContext.Context.Namespace == "" {
-		localContext.Context.Namespace = "default"
-	}
+	outFileName := contextsPath + "/" + context.FileID + "/" + fmt.Sprintf("%x", contextSha) + "/" + localContext.Context.Namespace + ".yaml"
 
-	outputFileName := contextsPath + "/" + context.FileID + "/" + fmt.Sprintf("%x", contextSha) + "/" + localContext.Context.Namespace + ".yaml"
+	return outFileName, outFileData, nil
+}
+
+func SaveContextFile(fileName string, fileData []byte, force bool) error {
 	// create directory for cluster:auth tupple
-	if _, err := os.Stat(path.Dir(outputFileName)); err != nil {
+	if _, err := os.Stat(path.Dir(fileName)); err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
-			if errMkdir := os.MkdirAll(path.Dir(outputFileName), 0755); errMkdir != nil {
-				return "", errMkdir
+			if errMkdir := os.MkdirAll(path.Dir(fileName), 0755); errMkdir != nil {
+				return errMkdir
 			}
 		}
 	}
 
-	// copy
-	_, err = os.Stat(path.Dir(outputFileName) + "/last-known.yaml")
-	if err == nil {
-		// copy last-known context
-		fin, err := os.Open(path.Dir(outputFileName) + "/last-known.yaml")
-		if err != nil {
-			return "", err
-		}
-		defer fin.Close()
+	lastNS := strings.TrimSuffix(path.Base(fileName), filepath.Ext(fileName))
 
-		fout, err := os.Create(outputFileName)
-		if err != nil {
-			return "", err
-		}
-		defer fout.Close()
-
-		_, err = io.Copy(fout, fin)
-
-		if err != nil {
-			return "", err
-		}
-	} else {
-		// save context for namespace
-		if err := os.WriteFile(outputFileName, outContext, 0640); err != nil {
-			return "", err
-		}
-
-		if err := os.WriteFile(path.Dir(outputFileName)+"/last-known.yaml", outContext, 0640); err != nil {
-			return "", err
-		}
+	if err := os.WriteFile(fileName, fileData, 0640); err != nil {
+		return err
 	}
 
-	return outputFileName, nil
+	if err := os.WriteFile(path.Dir(fileName)+"/last-namespace", []byte(lastNS), 0640); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func GetNSList(currentKonfigFile string) ([]string, error) {

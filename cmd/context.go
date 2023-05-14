@@ -84,7 +84,10 @@ var contextCmd = &cobra.Command{
 		kubeConfig, err := konfig.Load(contextList[contextID].FilePath, homedir)
 		cobra.CheckErr(err)
 
-		filePath, err := konfig.Generate(&contextList[contextID], kubeConfig, cfgContexts)
+		filePath, fileData, err := konfig.Generate(&contextList[contextID], kubeConfig, cfgContextsPath)
+		cobra.CheckErr(err)
+
+		err = konfig.SaveContextFile(filePath, fileData, false)
 		cobra.CheckErr(err)
 
 		log.Debug().Msgf("KUBECONFIGTOUSE:" + filePath)
