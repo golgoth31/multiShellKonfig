@@ -141,11 +141,11 @@ func SaveContextFile(fileName string, fileData []byte, force bool) error {
 
 	lastNS := strings.TrimSuffix(path.Base(fileName), filepath.Ext(fileName))
 
-	if err := os.WriteFile(fileName, fileData, 0640); err != nil {
+	if err := os.WriteFile(fileName, fileData, 0600); err != nil {
 		return err
 	}
 
-	if err := os.WriteFile(path.Dir(fileName)+"/last-namespace", []byte(lastNS), 0640); err != nil {
+	if err := os.WriteFile(path.Dir(fileName)+"/last-namespace", []byte(lastNS), 0600); err != nil {
 		return err
 	}
 
