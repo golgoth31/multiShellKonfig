@@ -76,10 +76,23 @@ var contextCmd = &cobra.Command{
 			)
 		}
 
+		log.Debug().Msgf("%d context(s) found", len(contextListString))
 		log.Debug().Msgf("context list: %v", contextList)
 
-		contextID, err := shell.LoadList(contextListString)
-		cobra.CheckErr(err)
+		contextID := 0
+
+		switch len(contextListString) {
+		case 0:
+			log.Info().Msg("No context found")
+			os.Exit(0)
+		case 1:
+			log.Info().Msg("Only one context found, using it")
+		default:
+			selectedContextID, err := shell.LoadList(contextListString)
+			cobra.CheckErr(err)
+
+			contextID = selectedContextID
+		}
 
 		kubeConfig, err := konfig.Load(contextList[contextID].FilePath, homedir)
 		cobra.CheckErr(err)
