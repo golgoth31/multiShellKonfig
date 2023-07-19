@@ -21,7 +21,7 @@ msk() {
 	export MSK_REQID="$(msk-bin genid)"
   msk-bin $@
 	res=$(cat /tmp/${MSK_REQID})
-  # only change $KUBECONFIG if instructed by konf-go
+  # only change $KUBECONFIG if instructed by msk
   if [[ $res == "KUBECONFIGTOUSE:"* ]]
   then
     # this basically takes the line and cuts out the KUBECONFIGTOUSE Part
@@ -36,7 +36,7 @@ msk() {
 `
 
 		var bash = `
-konf() {
+msk() {
   res=$(msk-bin $@)
   # only change $KUBECONFIG if instructed by konf-go
   if [[ $res == "KUBECONFIGTOUSE:"* ]]
