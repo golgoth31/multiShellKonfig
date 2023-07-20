@@ -17,7 +17,7 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "multiShellKonfig",
+	Use:   "msk",
 	Short: "A brief description of your application",
 }
 

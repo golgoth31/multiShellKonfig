@@ -22,6 +22,10 @@ var contextCmd = &cobra.Command{
 	},
 	Short: "Set the KUBECONFIG env variable to a specific context",
 	Args:  cobra.MaximumNArgs(1),
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		outputs := []string{"hello", "moto"}
+		return outputs, cobra.ShellCompDirectiveNoFileComp
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 		if !noID {
 			konfGoReqID = os.Getenv("MSK_REQID")

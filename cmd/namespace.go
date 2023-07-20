@@ -9,6 +9,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/golgoth31/multiShellKonfig/internal/namespace"
 	"github.com/golgoth31/multiShellKonfig/pkg/konfig"
 	"github.com/golgoth31/multiShellKonfig/pkg/shell"
 	"github.com/rs/zerolog/log"
@@ -16,68 +17,85 @@ import (
 )
 
 // namespaceCmd represents the context command
-var namespaceCmd = &cobra.Command{
-	Use: "namespace",
-	Aliases: []string{
-		"ns",
-	},
-	Short: "Set the KUBECONFIG env variable to a specific namespace in the current context",
-	Args:  cobra.MaximumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		if !noID {
-			konfGoReqID = os.Getenv("MSK_REQID")
-			if konfGoReqID == "" {
-				log.Fatal().Msg("Request ID not set")
+var (
+	nsObj        = namespace.Namespace{}
+	namespaceCmd = &cobra.Command{
+		Use: "namespace",
+		Aliases: []string{
+			"ns",
+		},
+		Short: "Set the KUBECONFIG env variable to a specific namespace in the current context",
+		Args:  cobra.MaximumNArgs(1),
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			var err error
+
+			nsObj, err = namespace.New(os.Getenv("KUBECONFIG"))
+			if err != nil {
+				return []string{}, cobra.ShellCompDirectiveError
 			}
-		}
 
-		curKubeConfig := os.Getenv("KUBECONFIG")
-		if curKubeConfig == "" {
-			log.Fatal().Msg("context not set")
-		}
+			output, err := nsObj.GetNsList()
+			if err != nil {
+				return []string{}, cobra.ShellCompDirectiveError
+			}
 
-		log.Debug().Msgf("found config: %s", curKubeConfig)
-
-		namespace := ""
-		if len(args) == 1 {
-			namespace = args[0]
-		} else {
-			namespaceList, err := konfig.GetNSList(curKubeConfig)
+			if len(args) != 0 {
+				for _, ns := range output {
+					if ns == args[0] {
+						output = []string{
+							ns,
+						}
+					}
+				}
+			}
+			return output, cobra.ShellCompDirectiveNoFileComp
+		},
+		Run: func(cmd *cobra.Command, args []string) {
+			nsObj, err := namespace.New(os.Getenv("KUBECONFIG"))
 			cobra.CheckErr(err)
 
-			ns, err := shell.LoadList(namespaceList)
+			nsObj.KonfGoReqID = os.Getenv("MSK_REQID")
+			if nsObj.KonfGoReqID == "" {
+				log.Fatal().Msg(errNoReqID.Error())
+			}
+
+			localNamespace := ""
+			if len(args) == 1 {
+				localNamespace = args[0]
+			} else {
+				namespaceList, errNamespaceList := nsObj.GetNsList()
+				cobra.CheckErr(errNamespaceList)
+
+				ns, errNs := shell.LoadList(namespaceList)
+				cobra.CheckErr(errNs)
+
+				localNamespace = namespaceList[ns]
+			}
+
+			kubeConfig, err := konfig.Load(nsObj.CurKubeConfig, homedir)
 			cobra.CheckErr(err)
 
-			namespace = namespaceList[ns]
-		}
+			kubeConfig.Contexts[0].Context.Namespace = localNamespace
 
-		kubeConfig, err := konfig.Load(curKubeConfig, homedir)
-		cobra.CheckErr(err)
+			filePath := path.Dir(nsObj.CurKubeConfig) + "/" + localNamespace + ".yaml"
 
-		kubeConfig.Contexts[0].Context.Namespace = namespace
+			fileData, err := json.Marshal(kubeConfig)
+			cobra.CheckErr(err)
 
-		filePath := path.Dir(curKubeConfig) + "/" + namespace + ".yaml"
+			err = konfig.SaveContextFile(filePath, fileData, true)
+			cobra.CheckErr(err)
 
-		fileData, err := json.Marshal(kubeConfig)
-		cobra.CheckErr(err)
+			log.Debug().Msgf("KUBECONFIGTOUSE:" + filePath)
 
-		err = konfig.SaveContextFile(filePath, fileData, true)
-		cobra.CheckErr(err)
-
-		log.Debug().Msgf("KUBECONFIGTOUSE:" + filePath)
-
-		if !noID {
-			err := os.WriteFile(
-				fmt.Sprintf("/tmp/%s", konfGoReqID),
+			err = os.WriteFile(
+				fmt.Sprintf("/tmp/%s", nsObj.KonfGoReqID),
 				[]byte("KUBECONFIGTOUSE:"+filePath),
 				0666,
 			)
 			cobra.CheckErr(err)
-		} else {
-			log.Info().Msgf("KUBECONFIGTOUSE:" + filePath)
-		}
-	},
-}
+		},
+	}
+)
 
 func init() {
 	rootCmd.AddCommand(namespaceCmd)
