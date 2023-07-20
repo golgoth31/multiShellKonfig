@@ -63,11 +63,11 @@ var (
 			if len(args) == 1 {
 				localNamespace = args[0]
 			} else {
-				namespaceList, err := nsObj.GetNsList()
-				cobra.CheckErr(err)
+				namespaceList, errNamespaceList := nsObj.GetNsList()
+				cobra.CheckErr(errNamespaceList)
 
-				ns, err := shell.LoadList(namespaceList)
-				cobra.CheckErr(err)
+				ns, errNs := shell.LoadList(namespaceList)
+				cobra.CheckErr(errNs)
 
 				localNamespace = namespaceList[ns]
 			}
