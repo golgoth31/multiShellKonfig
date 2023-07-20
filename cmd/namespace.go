@@ -66,10 +66,10 @@ var (
 				namespaceList, errNamespaceList := nsObj.GetNsList()
 				cobra.CheckErr(errNamespaceList)
 
-				ns, errNs := shell.LoadList(namespaceList)
+				ns, errNs := shell.LoadList("namespace", namespaceList)
 				cobra.CheckErr(errNs)
 
-				localNamespace = namespaceList[ns]
+				localNamespace = ns
 			}
 
 			kubeConfig, err := konfig.Load(nsObj.CurKubeConfig, homedir)

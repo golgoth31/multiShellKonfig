@@ -4,9 +4,11 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"sort"
+	"strings"
 
 	"github.com/golgoth31/multiShellKonfig/pkg/konfig"
 	"github.com/golgoth31/multiShellKonfig/pkg/shell"
@@ -23,7 +25,7 @@ var contextCmd = &cobra.Command{
 	Short: "Set the KUBECONFIG env variable to a specific context",
 	Args:  cobra.MaximumNArgs(1),
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		outputs := []string{"hello", "moto"}
+		outputs := []string{"hello zzzz", "moto"}
 		return outputs, cobra.ShellCompDirectiveNoFileComp
 	},
 	Run: func(cmd *cobra.Command, args []string) {
@@ -36,14 +38,9 @@ var contextCmd = &cobra.Command{
 			}
 		}
 
-		if len(args) == 1 {
-			// get single context
-
-			os.Exit(0)
-		}
-
 		contextList := shell.ShellContextList{}
 		contextListString := []string{}
+		konfigList := []*konfig.Konfig{}
 
 		// get all available contexts
 		for _, unitKonfig := range cfgData.Konfigs {
@@ -51,6 +48,14 @@ var contextCmd = &cobra.Command{
 
 			kubeConfig, err := konfig.Load(unitKonfig.Path, homedir)
 			cobra.CheckErr(err)
+
+			curKonfig := konfig.Konfig{
+				FileID:   unitKonfig.ID,
+				FilePath: unitKonfig.Path,
+				Content:  kubeConfig,
+			}
+
+			konfigList = append(konfigList, &curKonfig)
 
 			for _, context := range kubeConfig.Contexts {
 				log.Debug().Msgf("found context '%s@%s'", unitKonfig.Path, context.Name)
@@ -83,25 +88,52 @@ var contextCmd = &cobra.Command{
 		log.Debug().Msgf("%d context(s) found", len(contextListString))
 		log.Debug().Msgf("context list: %v", contextList)
 
-		contextID := 0
+		contextID := ""
 
-		switch len(contextListString) {
-		case 0:
-			log.Info().Msg("No context found")
-			os.Exit(0)
-		case 1:
-			log.Info().Msg("Only one context found, using it")
-		default:
-			selectedContextID, err := shell.LoadList(contextListString)
-			cobra.CheckErr(err)
+		if len(args) == 1 {
+			contextID = args[0]
+		} else {
+			switch len(contextListString) {
+			case 0:
+				log.Info().Msg("No context found")
+				os.Exit(0)
+			case 1:
+				log.Info().Msg("Only one context found, using it")
+			default:
+				var err error
 
-			contextID = selectedContextID
+				contextID, err = shell.LoadList("context", contextListString)
+				cobra.CheckErr(err)
+			}
 		}
 
-		kubeConfig, err := konfig.Load(contextList[contextID].FilePath, homedir)
-		cobra.CheckErr(err)
+		// kubeConfig, err := konfig.Load(contextList[contextID].FilePath, homedir)
+		// cobra.CheckErr(err)
 
-		filePath, fileData, err := konfig.Generate(&contextList[contextID], kubeConfig, cfgContextsPath)
+		curKonfig := konfig.Konfig{}
+		contextSplit := strings.Split(contextID, " (file: ")
+
+		if len(contextSplit) == 1 {
+			cobra.CheckErr(errors.New("context name badly formated"))
+		}
+
+		contextName := contextSplit[0]
+		log.Debug().Msgf("selected context: %s", contextName)
+
+		contextFileID := strings.Trim(contextSplit[1], "()")
+		log.Debug().Msgf("selected file: %s", contextFileID)
+
+		for _, konfigUnit := range konfigList {
+			log.Debug().Msgf("%s", contextFileID)
+
+			if konfigUnit.FilePath == contextFileID {
+				curKonfig = *konfigUnit
+
+				break
+			}
+		}
+
+		filePath, fileData, err := curKonfig.Generate(contextName, cfgContextsPath)
 		cobra.CheckErr(err)
 
 		err = konfig.SaveContextFile(filePath, fileData, false)

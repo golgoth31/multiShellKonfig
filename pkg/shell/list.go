@@ -1,32 +1,34 @@
 package shell
 
 import (
+	"fmt"
+
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/rs/zerolog/log"
 )
 
-func LoadList(itemList []string) (int, error) {
+func LoadList(itemType string, itemList []string) (string, error) {
 	var (
-		options     []string
-		optionIndex int
+		// options     []string
+		output string
 	)
 
-	for _, item := range itemList {
-		options = append(options, item)
-	}
+	// for _, item := range itemList {
+	// 	options = append(options, item)
+	// }
 
 	simpleQs := &survey.Select{
-		Message:  "Select context:",
-		Options:  options,
-		PageSize: len(options),
+		Message:  fmt.Sprintf("Select %s:", itemType),
+		Options:  itemList,
+		PageSize: len(itemList),
 	}
 
-	err := survey.AskOne(simpleQs, &optionIndex)
+	err := survey.AskOne(simpleQs, &output)
 	if err != nil {
 		log.Debug().Err(err).Msg("cannot ask list")
 
-		return 0, err
+		return "", err
 	}
 
-	return optionIndex, nil
+	return output, nil
 }
