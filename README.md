@@ -20,6 +20,12 @@ Source the wapper for the needed shell:
 source <(msk-bin shellwrapper zsh)
 ```
 
+Source the completion for the needed shell:
+
+```sh
+source <(msk-bin completion zsh)
+```
+
 To enter a new context:
 
 ```sh
@@ -35,13 +41,13 @@ msk namespace (or ns)
 You can define some alias for convinience, for example:
 
 ```sh
-alias kns="msk ns"
-alias kctx="msk ctx"
+alias kns="msk namespace"
+alias kctx="msk context"
 ```
 
 ## To do
 
 - allow to call 1 specific context
 - clean old contexts
-- completion
+- context completion
 - tests
