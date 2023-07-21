@@ -74,6 +74,7 @@ var contextCmd = &cobra.Command{
 		// Sort contextList by context name
 		sort.Stable(contextList)
 
+		// Generate list of context for select
 		for _, v := range contextList {
 			contextListString = append(
 				contextListString,
@@ -107,10 +108,9 @@ var contextCmd = &cobra.Command{
 			}
 		}
 
-		// kubeConfig, err := konfig.Load(contextList[contextID].FilePath, homedir)
-		// cobra.CheckErr(err)
-
 		curKonfig := konfig.Konfig{}
+
+		// extract context and file path from selection returned
 		contextSplit := strings.Split(contextID, " (file: ")
 
 		if len(contextSplit) == 1 {
@@ -123,6 +123,7 @@ var contextCmd = &cobra.Command{
 		contextFileID := strings.Trim(contextSplit[1], "()")
 		log.Debug().Msgf("selected file: %s", contextFileID)
 
+		// select the right file
 		for _, konfigUnit := range konfigList {
 			log.Debug().Msgf("%s", contextFileID)
 
@@ -131,6 +132,10 @@ var contextCmd = &cobra.Command{
 
 				break
 			}
+		}
+
+		if curKonfig.FileID == "" {
+			cobra.CheckErr(errors.New("Konfig not found"))
 		}
 
 		filePath, fileData, err := curKonfig.Generate(contextName, cfgContextsPath)
