@@ -193,18 +193,3 @@ func GetNSList(currentKonfigFile string) ([]string, error) {
 
 	return out, nil
 }
-
-// func (k *Konfig) Search(contextID string) (*kubeClientConfig.Config, error) {
-// 	kubeConfig := kubeClientConfig.Config{}
-
-// 	contextSplit := strings.Split(contextID, " ")
-
-// 	for _, context := range k.Content.Contexts {
-// 		if context.Name == contextSplit[1] {
-// 			return
-// 		}
-
-// 	}
-
-// 	return &kubeConfig, nil
-// }

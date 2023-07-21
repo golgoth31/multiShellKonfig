@@ -9,7 +9,6 @@ import (
 var (
 	debug           bool
 	noID            bool
-	konfGoReqID     string
 	cfgFile         string
 	cfgDir          string
 	cfgContextsPath string

@@ -18,7 +18,6 @@ import (
 
 // namespaceCmd represents the context command
 var (
-	nsObj        = namespace.Namespace{}
 	namespaceCmd = &cobra.Command{
 		Use: "namespace",
 		Aliases: []string{
@@ -27,9 +26,7 @@ var (
 		Short: "Set the KUBECONFIG env variable to a specific namespace in the current context",
 		Args:  cobra.MaximumNArgs(1),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			var err error
-
-			nsObj, err = namespace.New(os.Getenv("KUBECONFIG"))
+			nsObj, err := namespace.New(os.Getenv("KUBECONFIG"))
 			if err != nil {
 				return []string{}, cobra.ShellCompDirectiveError
 			}
@@ -54,8 +51,8 @@ var (
 			nsObj, err := namespace.New(os.Getenv("KUBECONFIG"))
 			cobra.CheckErr(err)
 
-			nsObj.KonfGoReqID = os.Getenv("MSK_REQID")
-			if nsObj.KonfGoReqID == "" {
+			nsObj.MskReqID = os.Getenv("MSK_REQID")
+			if nsObj.MskReqID == "" {
 				log.Fatal().Msg(errNoReqID.Error())
 			}
 
@@ -88,7 +85,7 @@ var (
 			log.Debug().Msgf("KUBECONFIGTOUSE:" + filePath)
 
 			err = os.WriteFile(
-				fmt.Sprintf("/tmp/%s", nsObj.KonfGoReqID),
+				fmt.Sprintf("/tmp/%s", nsObj.MskReqID),
 				[]byte("KUBECONFIGTOUSE:"+filePath),
 				0666,
 			)

@@ -32,6 +32,7 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
+	// initConfig()
 
 	rootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "debug mode")
 	rootCmd.PersistentFlags().BoolVar(&noID, "no-id", false, "disable request id usage")

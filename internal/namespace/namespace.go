@@ -8,7 +8,6 @@ import (
 )
 
 var (
-	errNoReqID    = errors.New("Request ID not set")
 	errKubeConfig = errors.New("context not set")
 )
 
