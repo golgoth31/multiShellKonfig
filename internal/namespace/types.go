@@ -1,6 +1,6 @@
 package namespace
 
 type Namespace struct {
-	KonfGoReqID   string
+	MskReqID      string
 	CurKubeConfig string
 }

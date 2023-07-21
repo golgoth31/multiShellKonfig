@@ -12,7 +12,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/golgoth31/multiShellKonfig/pkg/shell"
 	"github.com/rs/zerolog/log"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -44,10 +43,11 @@ func Load(path string, homeDir string) (*kubeClientConfig.Config, error) {
 	return &kubeConfig, nil
 }
 
-func Generate(context *shell.ContextDef, kubeConfig *kubeClientConfig.Config, contextsPath string) (string, []byte, error) {
+func (k *Konfig) Generate(contextName string, contextsPath string) (string, []byte, error) {
 	localContext := kubeClientConfig.NamedContext{}
-	for _, c := range kubeConfig.Contexts {
-		if c.Name == context.Name {
+
+	for _, c := range k.Content.Contexts {
+		if c.Name == contextName {
 			localContext = c
 
 			break
@@ -57,7 +57,7 @@ func Generate(context *shell.ContextDef, kubeConfig *kubeClientConfig.Config, co
 	localContext.Context.Namespace = ""
 
 	auth := kubeClientConfig.NamedAuthInfo{}
-	for _, authInfo := range kubeConfig.AuthInfos {
+	for _, authInfo := range k.Content.AuthInfos {
 		if authInfo.Name == localContext.Context.AuthInfo {
 			auth = authInfo
 
@@ -66,7 +66,7 @@ func Generate(context *shell.ContextDef, kubeConfig *kubeClientConfig.Config, co
 	}
 
 	cluster := kubeClientConfig.NamedCluster{}
-	for _, clusterInfo := range kubeConfig.Clusters {
+	for _, clusterInfo := range k.Content.Clusters {
 		if clusterInfo.Name == localContext.Context.Cluster {
 			cluster = clusterInfo
 
@@ -76,9 +76,9 @@ func Generate(context *shell.ContextDef, kubeConfig *kubeClientConfig.Config, co
 
 	//build config file for context
 	newFile := kubeClientConfig.Config{
-		APIVersion:  kubeConfig.APIVersion,
-		Kind:        kubeConfig.Kind,
-		Preferences: kubeConfig.Preferences,
+		APIVersion:  k.Content.APIVersion,
+		Kind:        k.Content.Kind,
+		Preferences: k.Content.Preferences,
 		Clusters: []kubeClientConfig.NamedCluster{
 			cluster,
 		},
@@ -100,7 +100,7 @@ func Generate(context *shell.ContextDef, kubeConfig *kubeClientConfig.Config, co
 		localContext.Context.Namespace = "default"
 	}
 
-	lastNS, err := os.ReadFile(contextsPath + "/" + context.FileID + "/" + fmt.Sprintf("%x", contextSha) + "/last-namespace")
+	lastNS, err := os.ReadFile(contextsPath + "/" + k.FileID + "/" + fmt.Sprintf("%x", contextSha) + "/last-namespace")
 	if err != nil {
 		log.Debug().Err(err).Msg("cannot read last-namespace file")
 	}
@@ -115,7 +115,7 @@ func Generate(context *shell.ContextDef, kubeConfig *kubeClientConfig.Config, co
 	newFile.Contexts = []kubeClientConfig.NamedContext{
 		localContext,
 	}
-	newFile.CurrentContext = context.Name
+	newFile.CurrentContext = contextName
 
 	outFileData, err := json.Marshal(newFile)
 	if err != nil {
@@ -124,7 +124,7 @@ func Generate(context *shell.ContextDef, kubeConfig *kubeClientConfig.Config, co
 		return "", []byte{}, err
 	}
 
-	outFileName := contextsPath + "/" + context.FileID + "/" + fmt.Sprintf("%x", contextSha) + "/" + localContext.Context.Namespace + ".yaml"
+	outFileName := contextsPath + "/" + k.FileID + "/" + fmt.Sprintf("%x", contextSha) + "/" + localContext.Context.Namespace + ".yaml"
 
 	return outFileName, outFileData, nil
 }
