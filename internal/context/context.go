@@ -49,7 +49,7 @@ func (ctx *Context) GetContextList() ([]string, error) {
 
 	for _, unitKonfig := range ctx.KonfigList {
 		for _, context := range unitKonfig.Content.Contexts {
-			log.Debug().Msgf("found context '%s@%s'", unitKonfig.FilePath, context.Name)
+			log.Debug().Msgf("found context '%s@%s'", context.Name, unitKonfig.FilePath)
 
 			contextList = append(
 				contextList,
@@ -72,7 +72,7 @@ func (ctx *Context) GetContextList() ([]string, error) {
 		contextListString = append(
 			contextListString,
 			fmt.Sprintf(
-				"%s (file: %s)",
+				"%s@%s",
 				v.Name,
 				v.FilePath,
 			),
