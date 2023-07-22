@@ -10,16 +10,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// var (
-// 	// errNoReqID    = errors.New("request ID not set")
-// 	// errKubeConfig = errors.New("no request id given")
-// )
-
 func New(mskConfig []config.Konfig, homedir string) (*Context, error) {
-	// if reqID == "" {
-	// 	return &Context{}, errNoReqID
-	// }
-
 	curContexts := &Context{}
 
 	// get all available contexts

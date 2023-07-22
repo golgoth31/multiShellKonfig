@@ -40,7 +40,6 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	// zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	if debug {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
@@ -58,18 +57,18 @@ func initConfig() {
 	cfgFile = cfgDir + "/config.yaml"
 	cfgContextsPath = cfgDir + "/contexts"
 
-	if _, errOsStat := os.Stat(cfgContextsPath); err != nil {
+	if _, errOsStat := os.Stat(cfgContextsPath); errOsStat != nil {
 		if errors.Is(errOsStat, fs.ErrNotExist) {
-			err = os.MkdirAll(cfgContextsPath, 0755)
+			err = os.MkdirAll(cfgContextsPath, dirPerm)
 			cobra.CheckErr(err)
 		}
 	}
 
 	cfgDataByte, err := os.ReadFile(cfgFile)
 	if err != nil {
-		if _, errOsStat := os.Stat(path.Dir(cfgFile)); err != nil {
+		if _, errOsStat := os.Stat(path.Dir(cfgFile)); errOsStat != nil {
 			if errors.Is(errOsStat, fs.ErrNotExist) {
-				err = os.MkdirAll(path.Dir(cfgFile), 0755)
+				err = os.MkdirAll(path.Dir(cfgFile), dirPerm)
 				cobra.CheckErr(err)
 			}
 		}
@@ -77,7 +76,7 @@ func initConfig() {
 		cfgDataByte, err = yaml.Marshal(config.DefaultConfig)
 		cobra.CheckErr(err)
 
-		err = os.WriteFile(cfgFile, cfgDataByte, 0640)
+		err = os.WriteFile(cfgFile, cfgDataByte, filePerm)
 		cobra.CheckErr(err)
 	}
 

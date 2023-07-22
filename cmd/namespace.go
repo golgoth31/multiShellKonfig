@@ -5,7 +5,6 @@ package cmd
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"path"
 
@@ -79,15 +78,15 @@ var (
 			fileData, err := json.Marshal(kubeConfig)
 			cobra.CheckErr(err)
 
-			err = konfig.SaveContextFile(filePath, fileData, true)
+			err = konfig.SaveContextFile(filePath, fileData)
 			cobra.CheckErr(err)
 
 			log.Debug().Msgf("KUBECONFIGTOUSE:" + filePath)
 
 			err = os.WriteFile(
-				fmt.Sprintf("/tmp/%s", nsObj.MskReqID),
+				nsObj.MskReqID,
 				[]byte("KUBECONFIGTOUSE:"+filePath),
-				0666,
+				filePerm,
 			)
 			cobra.CheckErr(err)
 		},

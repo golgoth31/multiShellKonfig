@@ -20,7 +20,7 @@ var shellwrapperCmd = &cobra.Command{
 msk() {
 	export MSK_REQID="$(msk-bin genid)"
   msk-bin $@
-	res=$(cat /tmp/${MSK_REQID})
+	res=$(cat ${MSK_REQID})
   # only change $KUBECONFIG if instructed by msk
   if [[ $res == "KUBECONFIGTOUSE:"* ]]
   then
@@ -30,7 +30,7 @@ msk() {
     # this makes --help work
     echo "${res}"
   fi
-	rm -f /tmp/${MSK_REQID}
+	rm -f ${MSK_REQID}
 	unset MSK_REQID
 }
 `

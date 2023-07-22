@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/rs/xid"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
@@ -17,11 +16,12 @@ var genidCmd = &cobra.Command{
 	Use:   "genid",
 	Short: "Generate a uniq id used by the wrapper",
 	Run: func(cmd *cobra.Command, args []string) {
-		localID := xid.New().String()
-		fmt.Println(localID)
-		if _, err := os.Create("/tmp/" + localID); err != nil {
+		file, err := os.CreateTemp("/tmp/", "msk-")
+		if err != nil {
 			log.Error().Err(err).Msg("")
 		}
+
+		fmt.Println(file.Name())
 	},
 }
 

@@ -67,7 +67,9 @@ Zsh:
 			anchor := "local -a completions" // this is basically a line early in the original script that we are going to cling onto
 			genZsh := strings.Replace(b.String(), anchor, anchor+"\n    words[1]=\"msk-bin\"", 1)
 
-			os.Stdout.WriteString(zshHeader + genZsh)
+			if _, err := os.Stdout.WriteString(zshHeader + genZsh); err != nil {
+				return err
+			}
 
 		case "bash":
 			var b bytes.Buffer
@@ -76,9 +78,11 @@ Zsh:
 				return err
 			}
 			anchor := "local requestComp lastParam lastChar args"
-			genBash := strings.Replace(b.String(), anchor, anchor+"\n    words[0]=\"msk-bin\"", 1) // basically the same as for zsh, but this words[] is zero-indexed
+			genBash := strings.Replace(b.String(), anchor, anchor+"\n    words[0]=\"msk-bin\"", 1)
 
-			os.Stdout.WriteString(genBash)
+			if _, err := os.Stdout.WriteString(genBash); err != nil {
+				return err
+			}
 
 		default:
 			return fmt.Errorf("msk currently does not support autocompletions for %s", args[0])

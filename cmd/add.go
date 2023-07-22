@@ -62,7 +62,7 @@ var (
 
 				log.Debug().Msgf("%s", cfgDataByte)
 
-				err = os.WriteFile(cfgFile, cfgDataByte, 0640)
+				err = os.WriteFile(cfgFile, cfgDataByte, filePerm)
 				cobra.CheckErr(err)
 			} else {
 				log.Info().Msg("path already exists in config")

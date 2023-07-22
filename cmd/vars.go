@@ -17,3 +17,8 @@ var (
 	errNoReqID      = errors.New("request ID not set")
 	cleanAll        bool
 )
+
+const (
+	filePerm = 0600
+	dirPerm  = 0700
+)

@@ -1,5 +1,7 @@
 package shell
 
+import "regexp"
+
 type ContextDef struct {
 	Name     string
 	FileID   string
@@ -8,7 +10,6 @@ type ContextDef struct {
 
 type ShellContextList []ContextDef
 
-// make ShellContextList sortable
-func (a ShellContextList) Len() int           { return len(a) }
-func (a ShellContextList) Less(i, j int) bool { return a[i].Name < a[j].Name }
-func (a ShellContextList) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+const ansi = "[\u001B\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[a-zA-Z\\d]*)*)?\u0007)|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PRZcf-ntqry=><~]))" //nolint
+
+var re = regexp.MustCompile(ansi)

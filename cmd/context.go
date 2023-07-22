@@ -5,7 +5,6 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"strings"
 
@@ -103,22 +102,22 @@ var (
 			}
 
 			if curKonfig.FileID == "" {
-				cobra.CheckErr(errors.New("Konfig not found"))
+				cobra.CheckErr(errors.New("konfig not found"))
 			}
 
 			filePath, fileData, err := curKonfig.Generate(contextName, cfgContextsPath)
 			cobra.CheckErr(err)
 
-			err = konfig.SaveContextFile(filePath, fileData, false)
+			err = konfig.SaveContextFile(filePath, fileData)
 			cobra.CheckErr(err)
 
 			log.Debug().Msgf("KUBECONFIGTOUSE:" + filePath)
 
 			if !noID {
 				err := os.WriteFile(
-					fmt.Sprintf("/tmp/%s", ctxObj.MskReqID),
+					ctxObj.MskReqID,
 					[]byte("KUBECONFIGTOUSE:"+filePath),
-					0666,
+					filePerm,
 				)
 				cobra.CheckErr(err)
 			} else {

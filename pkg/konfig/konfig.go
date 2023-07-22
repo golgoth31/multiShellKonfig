@@ -20,14 +20,19 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-func Load(path string, homeDir string) (*kubeClientConfig.Config, error) {
+const (
+	filePerm = 0600
+	dirPerm  = 0700
+)
+
+func Load(filePath, homeDir string) (*kubeClientConfig.Config, error) {
 	kubeConfig := kubeClientConfig.Config{}
 
-	if strings.HasPrefix(path, "~/") {
-		path = filepath.Join(homeDir, path[2:])
+	if strings.HasPrefix(filePath, "~/") {
+		filePath = filepath.Join(homeDir, filePath[2:])
 	}
 
-	fileContent, err := os.ReadFile(path)
+	fileContent, err := os.ReadFile(filePath)
 	if err != nil {
 		log.Debug().Err(err).Msg("unable to read file")
 
@@ -43,7 +48,7 @@ func Load(path string, homeDir string) (*kubeClientConfig.Config, error) {
 	return &kubeConfig, nil
 }
 
-func (k *Konfig) Generate(contextName string, contextsPath string) (string, []byte, error) {
+func (k *Konfig) Generate(contextName, contextsPath string) (string, []byte, error) {
 	localContext := kubeClientConfig.NamedContext{}
 
 	for _, c := range k.Content.Contexts {
@@ -57,24 +62,24 @@ func (k *Konfig) Generate(contextName string, contextsPath string) (string, []by
 	localContext.Context.Namespace = ""
 
 	auth := kubeClientConfig.NamedAuthInfo{}
-	for _, authInfo := range k.Content.AuthInfos {
-		if authInfo.Name == localContext.Context.AuthInfo {
-			auth = authInfo
+	for index := range k.Content.AuthInfos {
+		if k.Content.AuthInfos[index].Name == localContext.Context.AuthInfo {
+			auth = k.Content.AuthInfos[index]
 
 			break
 		}
 	}
 
 	cluster := kubeClientConfig.NamedCluster{}
-	for _, clusterInfo := range k.Content.Clusters {
-		if clusterInfo.Name == localContext.Context.Cluster {
-			cluster = clusterInfo
+	for index := range k.Content.Clusters {
+		if k.Content.Clusters[index].Name == localContext.Context.Cluster {
+			cluster = k.Content.Clusters[index]
 
 			break
 		}
 	}
 
-	//build config file for context
+	// build config file for context
 	newFile := kubeClientConfig.Config{
 		APIVersion:  k.Content.APIVersion,
 		Kind:        k.Content.Kind,
@@ -129,11 +134,11 @@ func (k *Konfig) Generate(contextName string, contextsPath string) (string, []by
 	return outFileName, outFileData, nil
 }
 
-func SaveContextFile(fileName string, fileData []byte, force bool) error {
+func SaveContextFile(fileName string, fileData []byte) error {
 	// create directory for cluster:auth tupple
 	if _, err := os.Stat(path.Dir(fileName)); err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
-			if errMkdir := os.MkdirAll(path.Dir(fileName), 0755); errMkdir != nil {
+			if errMkdir := os.MkdirAll(path.Dir(fileName), dirPerm); errMkdir != nil {
 				return errMkdir
 			}
 		}
@@ -141,11 +146,11 @@ func SaveContextFile(fileName string, fileData []byte, force bool) error {
 
 	lastNS := strings.TrimSuffix(path.Base(fileName), filepath.Ext(fileName))
 
-	if err := os.WriteFile(fileName, fileData, 0600); err != nil {
+	if err := os.WriteFile(fileName, fileData, filePerm); err != nil {
 		return err
 	}
 
-	if err := os.WriteFile(path.Dir(fileName)+"/last-namespace", []byte(lastNS), 0600); err != nil {
+	if err := os.WriteFile(path.Dir(fileName)+"/last-namespace", []byte(lastNS), filePerm); err != nil {
 		return err
 	}
 
@@ -187,8 +192,8 @@ func GetNSList(currentKonfigFile string) ([]string, error) {
 	}
 
 	out := []string{}
-	for _, namespace := range namespaceList.Items {
-		out = append(out, namespace.GetName())
+	for index := range namespaceList.Items {
+		out = append(out, namespaceList.Items[index].GetName())
 	}
 
 	return out, nil
