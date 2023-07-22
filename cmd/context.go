@@ -63,6 +63,7 @@ var (
 					os.Exit(0)
 				case 1:
 					log.Info().Msg("Only one context found, using it")
+					contextID = contextListString[0]
 				default:
 					var errContextID error
 
