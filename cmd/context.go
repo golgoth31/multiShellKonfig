@@ -74,7 +74,7 @@ var (
 			curKonfig := konfig.Konfig{}
 
 			// extract context and file path from selection returned
-			contextSplit := strings.Split(contextID, " (file: ")
+			contextSplit := strings.Split(contextID, "@")
 
 			if len(contextSplit) == 1 {
 				cobra.CheckErr(errors.New("context name badly formated"))
@@ -83,14 +83,18 @@ var (
 			contextName := contextSplit[0]
 			log.Debug().Msgf("selected context: %s", contextName)
 
-			contextFileID := strings.Trim(contextSplit[1], "()")
-			log.Debug().Msgf("selected file: %s", contextFileID)
+			// contextFilePath := strings.Trim(contextSplit[1], "()")
+			contextFilePath := contextSplit[1]
+			log.Debug().Msgf("selected file: %s", contextFilePath)
 
 			// select the right file
 			for _, konfigUnit := range ctxObj.KonfigList {
-				log.Debug().Msgf("%s", contextFileID)
+				log.Debug().Msgf("%q", contextName)
+				log.Debug().Msgf("%q", contextFilePath)
+				log.Debug().Msgf("%s", konfigUnit.FilePath)
 
-				if konfigUnit.FilePath == contextFileID {
+				// if konfigUnit.FilePath == contextFilePath {
+				if konfigUnit.FilePath == contextFilePath {
 					curKonfig = *konfigUnit
 
 					break
