@@ -18,14 +18,20 @@ func LoadList(itemType string, itemList []string) (string, error) {
 	fileStyle := pterm.NewStyle(pterm.FgGray)
 
 	for _, item := range itemList {
-		tabItem := strings.Split(item, "@")
+		contextOut := contextStyle.Sprint(item)
+		if itemType == "context" {
+			tabItem := strings.Split(item, "@")
 
-		items = append(items, pterm.DefaultBasicText.Sprint(contextStyle.Sprint(tabItem[0])+fileStyle.Sprint("@"+tabItem[1])))
+			contextOut = contextStyle.Sprint(tabItem[0]) + fileStyle.Sprint("@"+tabItem[1])
+		}
+
+		items = append(items, pterm.DefaultBasicText.Sprint(contextOut))
 	}
 
 	prompt := pterm.DefaultInteractiveSelect.
 		WithOptions(items).
-		WithDefaultText(fmt.Sprintf("Select %s:", itemType))
+		WithDefaultText(fmt.Sprintf("Select %s:", itemType)).
+		WithMaxHeight(len(items))
 
 	output, err := prompt.Show()
 	if err != nil {
