@@ -83,17 +83,14 @@ var (
 			contextName := contextSplit[0]
 			log.Debug().Msgf("selected context: %s", contextName)
 
-			// contextFilePath := strings.Trim(contextSplit[1], "()")
 			contextFilePath := contextSplit[1]
 			log.Debug().Msgf("selected file: %s", contextFilePath)
 
-			// select the right file
 			for _, konfigUnit := range ctxObj.KonfigList {
 				log.Debug().Msgf("%q", contextName)
 				log.Debug().Msgf("%q", contextFilePath)
 				log.Debug().Msgf("%s", konfigUnit.FilePath)
 
-				// if konfigUnit.FilePath == contextFilePath {
 				if konfigUnit.FilePath == contextFilePath {
 					curKonfig = *konfigUnit
 
