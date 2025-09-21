@@ -63,13 +63,13 @@ func SaveContextFile(fileName string, fileData []byte) error {
 	return nil
 }
 
-func GetNSList(currentKonfigFile string) ([]string, error) {
+func GetNSList(currentKonfigFile string) (string, []string, error) {
 	// read current context
 	currentKonfig, err := clientcmd.LoadFromFile(currentKonfigFile)
 	if err != nil {
 		log.Debug().Err(err).Msg("unable to get current context")
 
-		return []string{}, err
+		return "", []string{}, err
 	}
 
 	config := clientcmd.NewDefaultClientConfig(*currentKonfig, &clientcmd.ConfigOverrides{})
@@ -79,7 +79,7 @@ func GetNSList(currentKonfigFile string) ([]string, error) {
 	if errRestClient != nil {
 		log.Debug().Err(errRestClient).Msg("unable to create kube client")
 
-		return []string{}, errRestClient
+		return "", []string{}, errRestClient
 	}
 
 	// creates the clientset
@@ -87,14 +87,14 @@ func GetNSList(currentKonfigFile string) ([]string, error) {
 	if errKube != nil {
 		log.Debug().Err(errKube).Msg("unable to create kube client")
 
-		return []string{}, errKube
+		return "", []string{}, errKube
 	}
 
 	namespaceList, errNs := clientset.CoreV1().Namespaces().List(context.Background(), metav1.ListOptions{})
 	if errNs != nil {
 		log.Debug().Err(errNs).Msg("unable to get ns")
 
-		return []string{}, errNs
+		return "", []string{}, errNs
 	}
 
 	out := []string{}
@@ -102,5 +102,5 @@ func GetNSList(currentKonfigFile string) ([]string, error) {
 		out = append(out, namespaceList.Items[index].GetName())
 	}
 
-	return out, nil
+	return currentKonfig.Contexts[currentKonfig.CurrentContext].Namespace, out, nil
 }

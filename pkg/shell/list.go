@@ -8,7 +8,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func LoadList(itemType string, itemList []string) (string, error) {
+func LoadList(itemType string, currentItem string, itemList []string) (string, error) {
 	var (
 		output string
 	)
@@ -32,6 +32,10 @@ func LoadList(itemType string, itemList []string) (string, error) {
 		WithOptions(items).
 		WithDefaultText(fmt.Sprintf("Select %s:", itemType)).
 		WithMaxHeight(len(items))
+
+	if currentItem != "" {
+		prompt = prompt.WithDefaultOption(pterm.DefaultBasicText.Sprint(contextStyle.Sprint(currentItem)))
+	}
 
 	output, err := prompt.Show()
 	if err != nil {

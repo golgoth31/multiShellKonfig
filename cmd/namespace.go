@@ -30,7 +30,7 @@ var (
 				return []string{}, cobra.ShellCompDirectiveError
 			}
 
-			output, err := nsObj.GetNsList()
+			_, output, err := nsObj.GetNsList()
 			if err != nil {
 				return []string{}, cobra.ShellCompDirectiveError
 			}
@@ -59,10 +59,10 @@ var (
 			if len(args) == 1 {
 				localNamespace = args[0]
 			} else {
-				namespaceList, errNamespaceList := nsObj.GetNsList()
+				currentNs, namespaceList, errNamespaceList := nsObj.GetNsList()
 				cobra.CheckErr(errNamespaceList)
 
-				ns, errNs := shell.LoadList("namespace", namespaceList)
+				ns, errNs := shell.LoadList("namespace", currentNs, namespaceList)
 				cobra.CheckErr(errNs)
 
 				localNamespace = ns

@@ -66,7 +66,7 @@ var (
 				default:
 					var errContextID error
 
-					contextID, errContextID = shell.LoadList("context", contextListString)
+					contextID, errContextID = shell.LoadList("context", "", contextListString)
 					cobra.CheckErr(errContextID)
 				}
 			}

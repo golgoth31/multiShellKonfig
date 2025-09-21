@@ -1,10 +1,25 @@
+# This is an example .goreleaser.yml file with some sensible defaults.
+# Make sure to check the documentation at https://goreleaser.com
+
+# The lines below are called `modelines`. See `:help modeline`
+# Feel free to remove those if you don't want/need to use them.
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+# vim: set ts=2 sw=2 tw=0 fo=cnqoj
+
+version: 2
+
 env:
   - GO111MODULE=on
   - CGO_ENABLED=0
   - GO_MODULENAME=github.com/golgoth31/multiShellKonfig
+
 before:
   hooks:
+    # You may remove this if you don't use go modules.
     - go mod download
+    # you may remove this if you don't need go generate
+    - go generate ./...
+
 builds:
   - goarch:
       - amd64
@@ -20,13 +35,12 @@ builds:
       - -X "{{.Env.GO_MODULENAME}}/internal/config.Date={{.Date}}"
       - -X "{{.Env.GO_MODULENAME}}/internal/config.BuiltBy=goreleaser"
       - -X "{{.Env.GO_MODULENAME}}/internal/config.GitCommit={{.ShortCommit}}"
+
 archives:
-  - format: binary
+  - formats: [binary]
+    # this name template makes the OS and Arch compatible with the results of `uname`.
     name_template: "{{ .Binary }}_{{ .Tag }}_{{ .Os }}_{{ .Arch }}"
-checksum:
-  name_template: "msk-bin_{{ .Tag }}_SHA256SUMS.txt"
-snapshot:
-  name_template: "{{ .Tag }}-next"
+
 changelog:
   sort: asc
   filters:
@@ -34,5 +48,12 @@ changelog:
       - "^docs:"
       - "^test:"
       - "^Merge branch"
+
 release:
   name_template: "{{.Tag}}"
+
+snapshot:
+  version_template: "{{ .Tag }}-next"
+
+checksum:
+  name_template: "msk-bin_{{ .Tag }}_SHA256SUMS.txt"

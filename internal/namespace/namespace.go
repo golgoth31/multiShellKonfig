@@ -21,13 +21,13 @@ func New(curKubeConfig string) (Namespace, error) {
 	}, nil
 }
 
-func (ns *Namespace) GetNsList() ([]string, error) {
+func (ns *Namespace) GetNsList() (string, []string, error) {
 	log.Debug().Msgf("found config: %s", ns.CurKubeConfig)
 
-	namespaceList, err := konfig.GetNSList(ns.CurKubeConfig)
+	currentNs, namespaceList, err := konfig.GetNSList(ns.CurKubeConfig)
 	if err != nil {
-		return namespaceList, err
+		return currentNs, namespaceList, err
 	}
 
-	return namespaceList, nil
+	return currentNs, namespaceList, nil
 }
