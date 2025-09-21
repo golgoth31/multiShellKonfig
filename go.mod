@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/pterm/pterm v0.12.63
-	github.com/rs/xid v1.5.0
+	github.com/rs/xid v1.6.0
 	github.com/rs/zerolog v1.29.1
 	github.com/spf13/cobra v1.7.0
 	gopkg.in/yaml.v3 v3.0.1
