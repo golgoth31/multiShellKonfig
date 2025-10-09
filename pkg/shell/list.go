@@ -4,47 +4,32 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/pterm/pterm"
+	"github.com/charmbracelet/huh"
 	"github.com/rs/zerolog/log"
 )
 
 func LoadList(itemType string, currentItem string, itemList []string) (string, error) {
-	var (
-		output string
-	)
-
-	items := []string{}
-	contextStyle := pterm.NewStyle(pterm.FgLightBlue, pterm.Bold)
-	fileStyle := pterm.NewStyle(pterm.FgGray)
-
+	// Build plain, unstyled options; display equals value for simplicity
+	items := make([]string, 0, len(itemList))
 	for _, item := range itemList {
-		contextOut := contextStyle.Sprint(item)
-		if itemType == "context" {
-			tabItem := strings.Split(item, "@")
-
-			contextOut = contextStyle.Sprint(tabItem[0]) + fileStyle.Sprint("@"+tabItem[1])
-		}
-
-		items = append(items, pterm.DefaultBasicText.Sprint(contextOut))
+		// Keep the raw item (e.g., "context@file") to return an unambiguous value
+		items = append(items, item)
 	}
 
-	prompt := pterm.DefaultInteractiveSelect.
-		WithOptions(items).
-		WithDefaultText(fmt.Sprintf("Select %s:", itemType)).
-		WithMaxHeight(len(items))
+	// Pre-set selected value to enable default selection behavior
+	selected := strings.TrimSpace(currentItem)
 
-	if currentItem != "" {
-		prompt = prompt.WithDefaultOption(pterm.DefaultBasicText.Sprint(contextStyle.Sprint(currentItem)))
-	}
+	selectField := huh.NewSelect[string]().
+		Title(fmt.Sprintf("Select %s:", itemType)).
+		Options(huh.NewOptions(items...)...).
+		Value(&selected)
 
-	output, err := prompt.Show()
-	if err != nil {
+	if err := huh.NewForm(huh.NewGroup(selectField)).Run(); err != nil {
 		log.Debug().Err(err).Msg("cannot ask list")
-
 		return "", err
 	}
 
-	return re.ReplaceAllString(output, ""), nil
+	return strings.TrimSpace(selected), nil
 }
 
 // make ShellContextList sortable

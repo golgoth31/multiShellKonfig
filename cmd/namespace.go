@@ -51,7 +51,7 @@ var (
 			cobra.CheckErr(err)
 
 			nsObj.MskReqID = os.Getenv("MSK_REQID")
-			if nsObj.MskReqID == "" {
+			if !noID && nsObj.MskReqID == "" {
 				log.Fatal().Msg(errNoReqID.Error())
 			}
 
@@ -81,14 +81,18 @@ var (
 			err = konfig.SaveContextFile(filePath, fileData)
 			cobra.CheckErr(err)
 
-			log.Debug().Msgf("KUBECONFIGTOUSE:" + filePath)
+			log.Debug().Msg("KUBECONFIGTOUSE:" + filePath)
 
-			err = os.WriteFile(
-				nsObj.MskReqID,
-				[]byte("KUBECONFIGTOUSE:"+filePath),
-				filePerm,
-			)
-			cobra.CheckErr(err)
+			if !noID {
+				err = os.WriteFile(
+					nsObj.MskReqID,
+					[]byte("KUBECONFIGTOUSE:"+filePath),
+					filePerm,
+				)
+				cobra.CheckErr(err)
+			} else {
+				log.Info().Msg("KUBECONFIGTOUSE:" + filePath)
+			}
 		},
 	}
 )

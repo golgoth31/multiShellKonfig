@@ -42,7 +42,7 @@ var (
 			cobra.CheckErr(err)
 
 			ctxObj.MskReqID = os.Getenv("MSK_REQID")
-			if ctxObj.MskReqID == "" {
+			if !noID && ctxObj.MskReqID == "" {
 				log.Fatal().Msg(errNoReqID.Error())
 			}
 
@@ -108,7 +108,7 @@ var (
 			err = konfig.SaveContextFile(filePath, fileData)
 			cobra.CheckErr(err)
 
-			log.Debug().Msgf("KUBECONFIGTOUSE:" + filePath)
+			log.Debug().Msg("KUBECONFIGTOUSE:" + filePath)
 
 			if !noID {
 				err := os.WriteFile(
@@ -118,7 +118,7 @@ var (
 				)
 				cobra.CheckErr(err)
 			} else {
-				log.Info().Msgf("KUBECONFIGTOUSE:" + filePath)
+				log.Info().Msg("KUBECONFIGTOUSE:" + filePath)
 			}
 		},
 	}
