@@ -5,7 +5,7 @@ go 1.24.0
 require (
 	github.com/charmbracelet/huh v0.8.0
 	github.com/rs/xid v1.6.0
-	github.com/rs/zerolog v1.34.0
+	github.com/rs/zerolog v1.35.1
 	github.com/spf13/cobra v1.10.1
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/apimachinery v0.34.2
