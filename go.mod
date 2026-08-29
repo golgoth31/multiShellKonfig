@@ -3,7 +3,7 @@ module github.com/golgoth31/multiShellKonfig
 go 1.26.0
 
 require (
-	github.com/charmbracelet/huh v0.8.0
+	github.com/charmbracelet/huh/v2 v2.0.3
 	github.com/rs/xid v1.6.0
 	github.com/rs/zerolog v1.34.0
 	github.com/spf13/cobra v1.10.2
