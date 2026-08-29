@@ -9,10 +9,10 @@ import (
 
 	"github.com/golgoth31/multiShellKonfig/internal/config"
 	"github.com/golgoth31/multiShellKonfig/pkg/konfig"
-	"github.com/rs/xid"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
+	"uuid"
 )
 
 var (
@@ -53,7 +53,7 @@ var (
 
 				localConf := config.Konfig{
 					Path: path,
-					ID:   xid.New().String(),
+					ID:   uuid.New().String(),
 				}
 				cfgData.Konfigs = append(cfgData.Konfigs, localConf)
 

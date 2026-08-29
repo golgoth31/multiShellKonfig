@@ -1,7 +1,7 @@
 // Package config ...
 package config
 
-import "github.com/rs/xid"
+import "uuid"
 
 var (
 	// DefaultConfig defines the base default configuration.
@@ -9,7 +9,7 @@ var (
 		Konfigs: []Konfig{
 			{
 				Path: "~/.kube/config",
-				ID:   xid.New().String(),
+				ID:   uuid.New().String(),
 			},
 		},
 	}
