@@ -6,13 +6,13 @@ package cmd
 import (
 	"os"
 	"strings"
+	"uuid"
 
 	"github.com/golgoth31/multiShellKonfig/internal/config"
 	"github.com/golgoth31/multiShellKonfig/pkg/konfig"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
-	"uuid"
 )
 
 var (

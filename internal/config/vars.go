@@ -14,17 +14,18 @@ var (
 		},
 	}
 
-	// Dynamic version retrieve with ldflags.
+	// The following version variables are injected at build time via the
+	// -ldflags -X flag (see the Makefile).
 
-	// Version represent version of application.
+	// Version represents the application version.
 	Version string
 
-	// Date represent date of build.
+	// Date represents the build date.
 	Date string
 
-	// BuiltBy represent date of build.
+	// BuiltBy identifies the user that built the binary.
 	BuiltBy string
 
-	// BuiltBy represent date of build.
+	// GitCommit holds the git commit the binary was built from.
 	GitCommit string
 )
